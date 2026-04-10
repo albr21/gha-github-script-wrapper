@@ -1,0 +1,94 @@
+name: gha-github-script-wrapper
+
+description: |-
+  A wrapper around the `actions/github-script` action to execute a JavaScript
+  script with the GitHub Actions toolkit and context.
+
+author: albr21
+branding:
+  icon: code
+  color: blue
+
+inputs:
+  script:
+    description: |-
+      Path to the JavaScript file to execute.
+
+      The script should look like:
+
+      ```javascript
+        module.exports = async ({github, context, core, glob, io, exec, getOctokit}) => {
+          // Your code here
+        }
+      ```
+      The script will be executed with the GitHub Actions toolkit and context as arguments.
+
+      To export an output from the script, you can use `core.setOutput('output', value)`
+      and it will be available as the `output` output of this action.
+
+      For more information about the available features in the script, see the documentation
+      of the `actions/github-script` action: https://github.com/actions/github-script.
+    required: true
+  inputs:
+    description: |-
+      Inputs string to pass to the script. This can be used to provide custom
+      input data to the script, which can be accessed via the `core.getInput('input')`
+      environment variable in the script.
+
+      The input string is passed as-is to the script, so it can be a JSON string,
+      a comma-separated list, or any other format that the script can parse.
+
+      Recommended to use a JSON string to pass complex data structures to the script.
+      And parse it in the script using `JSON.parse(core.getInput('input', {required: false}))`
+      to access the data as a JavaScript object.
+    required: false
+    default: ""
+  rest-retries:
+    description: Number of retry for REST query
+    required: false
+    default: "3"
+  command-line-interpreter:
+    description: |-
+      Command line interpreter.
+      By default, it uses `bash`, but you can change it to `sh`, `powershell`, or any other supported shell if needed.
+    required: false
+    default: bash
+
+outputs:
+  output:
+    description: Output from the script. This output is set by the script using `core.setOutput('output', value)`.
+    value: ${{ steps.caller.outputs.output }}
+
+runs:
+  using: composite
+  steps:
+    - name: Normalize JS script path
+      id: normalize
+      run: |
+        echo "script=$(echo ${{ inputs.script }} | sed 's/^.*\.\///g')" >> "$GITHUB_OUTPUT"
+      shell: ${{ inputs.command-line-interpreter }}
+
+    - name: Call JS script via github-script
+      id: caller
+      uses: actions/github-script@v9.0.0
+      env:
+        INPUT_INPUT: ${{ inputs.inputs }}
+      with:
+        retries: ${{ inputs.rest-retries }}
+        script: |-
+          const fs = __original_require__('fs');
+          const path = '${{ steps.normalize.outputs.script }}';
+
+          try {
+            if (fs.existsSync(path)) {
+              console.log(`Executing script: ${path}`);
+              const script = require(path);
+              await script({github, context, core, glob, io, exec, getOctokit});
+            } else {
+              console.error(`Script not found: ${path}`);
+              core.setFailed(`Script not found: ${path}`);
+            }
+          } catch (error) {
+            console.error(`Error executing script: ${error.message}, stack: ${error.stack}`);
+            core.setFailed(`Error executing script: ${error.message}, stack: ${error.stack}`);
+          }

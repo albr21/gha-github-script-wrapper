@@ -1,10 +1,21 @@
-# <project-name>
+# gha-github-script-wrapper
 
-<!-- A brief description of the project. -->
+A wrapper around the `actions/github-script` action to execute a JavaScript script
+with the GitHub Actions toolkit and context.
 
 ## Usage
 
-<!-- Provide instructions on how to use the project, including code examples if applicable. -->
+To use this action in your GitHub Actions workflow, add the following step to your workflow YAML file:
+
+```yaml
+- name: Run JavaScript script with GitHub Script Wrapper
+  uses: albr21/gha-github-script-wrapper@v1.0.0
+  with:
+    script: ${{ env.GITHUB_ACTION_PATH }}/path/to/your/script.js
+    input: '{"key": "value"}'
+    rest-retries: 3
+    command-line-interpreter: bash
+```
 
 ## Contributing
 
