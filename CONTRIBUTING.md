@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for considering contributing to **<project-name>**! Here’s how you can help:
+Thanks for considering contributing to **gha-github-script-wrapper**! Here’s how you can help:
 
 ## How to Contribute
 1. **Fork** the repository
