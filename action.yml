@@ -72,7 +72,7 @@ runs:
       id: caller
       uses: actions/github-script@v9.0.0
       env:
-        INPUT_INPUT: ${{ inputs.inputs }}
+        INPUT_INPUTS: ${{ inputs.inputs }}
       with:
         retries: ${{ inputs.rest-retries }}
         script: |-
