@@ -3,8 +3,10 @@ description: |-
   A wrapper around the `actions/github-script` action to execute a JavaScript
   script with the GitHub Actions toolkit and context.
 version: 1.0.0
-changes: |-
-  [1.0.0]
-    * Initial release
-  [0.0.0]
-    * Under development
+releases:
+  - version: 1.0.0
+    changes:
+      - Initial release
+  - version: 0.0.0
+    changes:
+      - Under development
